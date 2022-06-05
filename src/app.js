@@ -2,6 +2,7 @@ import opensea from "opensea-js";
 import { OrderSide } from 'opensea-js/lib/types.js';
 import HDWalletProvider from '@truffle/hdwallet-provider';
 import dotenv from 'dotenv'
+import { budgetPrice, incrementPrice, minPrice } from "./config.js";
 
 const OpenSeaPort = opensea.OpenSeaPort;
 const Network = opensea.Network;
@@ -53,17 +54,18 @@ async function offer(tokenId) {
   console.log(tokenId)
   if (orders.length > 0) {
     maxPrice = orders[0].currentPrice;
-    targetPrice = maxPrice / decimal + 0.001
+    targetPrice = maxPrice / decimal + incrementPrice
+
     console.log(`===== ${orders[0].makerAccount.address}`)
     if (accountAddress === orders[0].makerAccount.address) {
       console.log('===== already offered')
       return;
     }
   } else {
-    targetPrice = 0.34
+    targetPrice = minPrice
   }
   
-  if (targetPrice < 0.365) {
+  if (targetPrice < budgetPrice) {
     console.log(`===== price: `, maxPrice / decimal, targetPrice)
     await seaport.createBuyOrder({
       asset: {
@@ -74,7 +76,7 @@ async function offer(tokenId) {
       // Value of the offer, in units of the payment token (or wrapped ETH if none is specified):
       startAmount: targetPrice,
       expirationTime: Math.round(Date.now() / 1000 + 60 * 60 * 12)
-    })
+    });
     console.log(
       `===== Successfully created an offer order!`
     );
@@ -84,11 +86,17 @@ async function offer(tokenId) {
 }
 // offer(172);
 const loopCheck = async () => {
+  console.log('>>>>>>>offer start')
   for(let i = 100; i > 10; i--) {
-    await offer(i);
+    try {
+      await offer(i);
+    } catch(e) {
+      console.log(`>>>ERROR<<<: tokenID: ${i} --- ${e.toString()}`)
+    }
     await Timer(500)
   }
+  console.log('>>>>>>>offer end')
 }
 
 loopCheck();
-setInterval(loopCheck, 600000)
+setInterval(loopCheck, 1000 * 60 * 10)
