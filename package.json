@@ -8,11 +8,9 @@
     "esbuild": "^0.14.38"
   },
   "dependencies": {
-    "@0x/subproviders": "^6.6.5",
     "@truffle/hdwallet-provider": "^2.0.8",
-    "opensea-js": "^3.0.4",
-    "web3": "^1.7.3",
-    "web3-provider-engine": "^16.0.4"
+    "dotenv": "^16.0.1",
+    "opensea-js": "^3.0.4"
   },
   "scripts": {
     "start": "node src/app.js"

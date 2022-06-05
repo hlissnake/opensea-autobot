@@ -1,11 +1,14 @@
 import opensea from "opensea-js";
 import { OrderSide } from 'opensea-js/lib/types.js';
 import HDWalletProvider from '@truffle/hdwallet-provider';
+import dotenv from 'dotenv'
 
 const OpenSeaPort = opensea.OpenSeaPort;
 const Network = opensea.Network;
 
-const NODE_API_KEY = process.env.INFURA_KEY || process.env.ALCHEMY_KEY || 'c940252336c140ee855fe8b752de0877';
+dotenv.config()
+
+const NODE_API_KEY = process.env.INFURA_KEY || process.env.ALCHEMY_KEY;
 const NETWORK = process.env.NETWORK || 'mainnet';
 const API_KEY = process.env.API_KEY; // API key is optional but useful if you're doing a high volume of requests.
 
@@ -62,16 +65,16 @@ async function offer(tokenId) {
   
   if (targetPrice < 0.365) {
     console.log(`===== price: `, maxPrice / decimal, targetPrice)
-    // await seaport.createBuyOrder({
-    //   asset: {
-    //     tokenId,
-    //     tokenAddress,
-    //   },
-    //   accountAddress,
-    //   // Value of the offer, in units of the payment token (or wrapped ETH if none is specified):
-    //   startAmount: targetPrice,
-    //   expirationTime: Math.round(Date.now() / 1000 + 60 * 60 * 12)
-    // })
+    await seaport.createBuyOrder({
+      asset: {
+        tokenId,
+        tokenAddress,
+      },
+      accountAddress,
+      // Value of the offer, in units of the payment token (or wrapped ETH if none is specified):
+      startAmount: targetPrice,
+      expirationTime: Math.round(Date.now() / 1000 + 60 * 60 * 12)
+    })
     console.log(
       `===== Successfully created an offer order!`
     );
@@ -80,7 +83,12 @@ async function offer(tokenId) {
   }
 }
 // offer(172);
-for(let i = 200; i > 0; i--) {
-  await offer(i);
-  await Timer(300)
+const loopCheck = async () => {
+  for(let i = 100; i > 10; i--) {
+    await offer(i);
+    await Timer(500)
+  }
 }
+
+loopCheck();
+setInterval(loopCheck, 600000)
