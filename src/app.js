@@ -2,7 +2,7 @@ import opensea from "opensea-js";
 import { OrderSide } from 'opensea-js/lib/types.js';
 import HDWalletProvider from '@truffle/hdwallet-provider';
 import dotenv from 'dotenv'
-import { budgetPrice, incrementPrice, minPrice } from "./config.js";
+import { budgetPrice, incrementPrice, minPrice, NFT_ADDRESS } from "./config.js";
 
 const OpenSeaPort = opensea.OpenSeaPort;
 const Network = opensea.Network;
@@ -41,7 +41,7 @@ const Timer = async (ms) => {
 }
 
 const decimal = 1000000000000000000;
-const tokenAddress = '0x020cdc4775366ae436f13a7d333143432e884934'
+const tokenAddress = NFT_ADDRESS;
 
 async function offer(tokenId) {
 
