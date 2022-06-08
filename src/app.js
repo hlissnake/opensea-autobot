@@ -43,8 +43,24 @@ const Timer = async (ms) => {
 const decimal = 1000000000000000000;
 const tokenAddress = NFT_ADDRESS;
 
-async function offer(tokenId) {
 
+const query = async () => {
+  const map = {}
+
+  const asset = await seaport.api.getAsset({
+    tokenAddress, // string
+    tokenId, // string | number | null
+  })
+  const power = asset.traits.find(({trait_type}) => trait_type === 'Power')
+  if (map[power.value]) {
+    map[power.value].push(tokenId)
+  } else {
+    map[power.value] = [tokenId]
+  }
+  console.log(`${tokenId}: `, power.value)
+}
+
+async function offer(tokenId) {
   const { orders } = await seaport.api.getOrders({
     asset_contract_address: tokenAddress,
     token_id: tokenId,
@@ -53,10 +69,10 @@ async function offer(tokenId) {
   let maxPrice, targetPrice;
   console.log(tokenId)
   if (orders.length > 0) {
-    maxPrice = orders[0].currentPrice;
-    targetPrice = maxPrice / decimal + incrementPrice
+    maxPrice = orders[0].currentPrice / decimal;
+    targetPrice = maxPrice >= minPrice ? maxPrice + incrementPrice : minPrice
 
-    console.log(`===== ${orders[0].makerAccount.address}`)
+    console.log(`===== current offerer: ${orders[0].makerAccount.address}`)
     if (accountAddress === orders[0].makerAccount.address) {
       console.log('===== already offered')
       return;
@@ -66,7 +82,7 @@ async function offer(tokenId) {
   }
   
   if (targetPrice < budgetPrice) {
-    console.log(`===== price: `, maxPrice / decimal, targetPrice)
+    console.log(`===== current price: ${maxPrice} & new price: ${targetPrice}`)
     await seaport.createBuyOrder({
       asset: {
         tokenId,
@@ -87,7 +103,7 @@ async function offer(tokenId) {
 // offer(172);
 const loopCheck = async () => {
   console.log('>>>>>>>offer start')
-  for(let i = 100; i > 10; i--) {
+  for(let i = 2454; i >= 2357; i--) {
     try {
       await offer(i);
     } catch(e) {
@@ -97,6 +113,5 @@ const loopCheck = async () => {
   }
   console.log('>>>>>>>offer end')
 }
-
 loopCheck();
-setInterval(loopCheck, 1000 * 60 * 10)
+// setInterval(loopCheck, 1000 * 60 * 10)
